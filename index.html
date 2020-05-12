@@ -8,6 +8,46 @@
             width: 250px;
         }
 
+        .image {
+            position: absolute;
+            top: 50%;
+            left: 40%;
+            width: 300px;
+            margin: -300px 0 0 0;
+            -webkit-animation:spin 1.5s linear infinite;
+            -moz-animation:spin 1.5s linear infinite;
+            animation:spin 1.5s linear infinite;
+        }
+        @-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+        @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+
+        .hide {
+            animation: scaledown 0.5s linear;
+            animation-fill-mode: forwards;
+        }
+
+        @-webkit-keyframes scaledown {
+            0% {
+                -webkit-transform: scale(1);
+                transform: scale(1);
+            }
+            100% {
+                -webkit-transform: scale(0);
+                transform: scale(0) rotate(-360deg);;
+            }
+        }
+        @keyframes scaledown {
+            0% {
+                -webkit-transform: scale(1);
+                transform: scale(1) rotate(-360deg);;
+            }
+            100% {
+                -webkit-transform: scale(0);
+                transform: scale(0);
+            }
+        }
+
+
         button {
             color: #fff;
             text-transform: uppercase;
@@ -53,8 +93,12 @@
     <button id="last" onclick="load()">Last used</button><button onclick="ok()">Start!</button>
 </div>
 
+<img class="image" id="coffee" style="display: none" src="coffee.png"/>
+
 <div id="pairs">
 </div>
+
+
 <script>
     function shuffle(array) {
         var currentIndex = array.length,
@@ -117,11 +161,12 @@
 
         var results = document.getElementById("pairs");
         setTimeout(function () {
+            document.getElementById("coffee").style.display = "block";
             document.onclick = function () {
-                if (pairs.length) {
-                    var pair = pairs.pop();
+                document.getElementById("coffee").className = "image hide";
+                pairs.forEach(function(pair) {
                     results.innerHTML += '<span class="pair">' + pair.join(' ☕ ') + "<span>";
-                }
+                });
             };
         }, 0);
     }
