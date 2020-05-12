@@ -1,0 +1,130 @@
+<html>
+<head>
+    <title>Coffee Roulette</title>
+    <link rel="shortcut icon" type="image/x-icon" href="./favicon.ico">
+    <style>
+        #names {
+            height: 100px;
+            width: 250px;
+        }
+
+        button {
+            color: #fff;
+            text-transform: uppercase;
+            text-decoration: none;
+            background: #666666;
+            padding: 5px;
+            margin: 5px;
+            border-radius: 3px;
+            display: inline-block;
+            border: none;
+        }
+
+        #pairs {
+            padding-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        .pair {
+            display: block;
+            padding: 10px;
+        }
+
+        .note {
+            padding: 5px;
+            display: block;
+            font-size: 15px;
+            color: #666666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+<div id="panel">
+    <span class="note">Enter names in separate lines...</span>
+    <span class="note">On the next page click to reveal each pair.</span>
+    <textarea id="names"></textarea><br/>
+    <button id="last" onclick="load()">Last used</button><button onclick="ok()">Start!</button>
+</div>
+
+<div id="pairs">
+</div>
+<script>
+    function shuffle(array) {
+        var currentIndex = array.length,
+            temporaryValue, randomIndex;
+
+        // While there remain elements to shuffle...
+        while (0 !== currentIndex) {
+
+            // Pick a remaining element...
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+
+            // And swap it with the current element.
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+    }
+
+    function load() {
+        var names = window.localStorage.getItem("names");
+        if (names) {
+            document.getElementById("names").value = names;
+        }
+    }
+
+    function ok() {
+        var namesArea = document.getElementById("names");
+
+        if (namesArea.value.trim() === "") {
+            alert("Add at least one name");
+            return;
+        }
+
+        window.localStorage.setItem("names", namesArea.value);
+
+        names = namesArea.value.split(/\n|\n\r|\r/g).map(function (name) {
+            return name.trim()
+        });
+        names = shuffle(names);
+
+        var panel = document.getElementById("panel");
+        panel.parentNode.removeChild(panel);
+
+        pairs = [];
+        var extra = null;
+        for (var i = 0; i < names.length; i += 2) {
+            if (names[i + 1]) {
+                pairs.push([names[i], names[i + 1]])
+            } else {
+                extra = names[i]
+            }
+        }
+
+        if (extra) {
+            pairs[0].push(extra);
+        }
+
+        var results = document.getElementById("pairs");
+        setTimeout(function () {
+            document.onclick = function () {
+                if (pairs.length) {
+                    var pair = pairs.pop();
+                    results.innerHTML += '<span class="pair">' + pair.join(' ☕ ') + "<span>";
+                }
+            };
+        }, 0);
+    }
+</script>
+</body>
+</html>
