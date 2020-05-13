@@ -163,6 +163,7 @@
         setTimeout(function () {
             document.getElementById("coffee").style.display = "block";
             document.onclick = function () {
+                document.onclick = null;
                 document.getElementById("coffee").className = "image hide";
                 pairs.forEach(function(pair) {
                     results.innerHTML += '<span class="pair">' + pair.join(' ☕ ') + "<span>";
