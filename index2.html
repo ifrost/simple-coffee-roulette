@@ -1,0 +1,208 @@
+<html>
+<head>
+    <title>Coffee Roulette</title>
+    <link rel="shortcut icon" type="image/x-icon" href="./favicon.ico">
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Oswald);
+
+        body {
+            font-family: 'Oswald', 'Arial', sans-serif;
+            font-size: 18px;
+            background-color: #eee;
+        }
+
+        #names, #activities {
+            height: 100px;
+            width: 250px;
+        }
+
+        .image {
+            position: absolute;
+            top: 50%;
+            left: 40%;
+            width: 300px;
+            margin: -300px 0 0 0;
+            -webkit-animation:spin 1.5s linear infinite;
+            -moz-animation:spin 1.5s linear infinite;
+            animation:spin 1.5s linear infinite;
+        }
+        @-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+        @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+
+        .hide {
+            animation: scaledown 0.5s linear;
+            animation-fill-mode: forwards;
+        }
+
+        .pair {
+            color: #000000;
+            padding: 1px;
+            margin: 5px;
+        }
+
+        .activity {
+            color: #444444;
+            text-decoration: underline;
+        }
+
+        @-webkit-keyframes scaledown {
+            0% {
+                -webkit-transform: scale(1);
+                transform: scale(1);
+            }
+            100% {
+                -webkit-transform: scale(0);
+                transform: scale(0) rotate(-360deg);;
+            }
+        }
+        @keyframes scaledown {
+            0% {
+                -webkit-transform: scale(1);
+                transform: scale(1) rotate(-360deg);;
+            }
+            100% {
+                -webkit-transform: scale(0);
+                transform: scale(0);
+            }
+        }
+
+
+        button {
+            color: #fff;
+            text-transform: uppercase;
+            text-decoration: none;
+            background: #666666;
+            padding: 5px;
+            margin: 5px;
+            border-radius: 3px;
+            display: inline-block;
+            border: none;
+        }
+
+        #pairs {
+            padding-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        .note {
+            padding: 5px;
+            display: block;
+            font-size: 15px;
+            color: #666666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+<div id="panel">
+    <span class="note">Enter names in separate lines:</span>
+    <textarea id="names"></textarea><br/>
+    <span class="note">Enter activities in separate lines:</span>
+    <textarea id="activities"></textarea><br/>
+    <span class="note">On the next page click to reveal pairs.</span>
+
+    <button id="last" onclick="load()">Last used</button><button onclick="ok()">Start!</button>
+</div>
+
+<img class="image" id="coffee" style="display: none" src="coffee.png"/>
+
+<div id="pairs">
+</div>
+
+<script>
+    function shuffle(array) {
+        var currentIndex = array.length,
+            temporaryValue, randomIndex;
+
+        // While there remain elements to shuffle...
+        while (0 !== currentIndex) {
+
+            // Pick a remaining element...
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+
+            // And swap it with the current element.
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+    }
+
+    function load() {
+        var names = window.localStorage.getItem("names");
+        if (names) {
+            document.getElementById("names").value = names;
+        }
+        var activities = window.localStorage.getItem("activities");
+        if (activities) {
+            document.getElementById("activities").value = activities;
+        }
+    }
+
+    function ok() {
+        var namesArea = document.getElementById("names");
+        var activitiesArea = document.getElementById("activities");
+
+        if (namesArea.value.trim() === "") {
+            alert("Add at least one name");
+            return;
+        }
+
+        window.localStorage.setItem("names", namesArea.value);
+        window.localStorage.setItem("activities", activitiesArea.value);
+
+        var names = namesArea.value.split(/\n|\n\r|\r/g).map(function (name) {
+            return name.trim()
+        });
+        names = shuffle(names);
+        var activities = activitiesArea.value.split(/\n|\n\r|\r/g).map(function (name) {
+            return name.trim()
+        });
+
+        var panel = document.getElementById("panel");
+        panel.parentNode.removeChild(panel);
+
+        pairs = [];
+        var extra = null;
+        for (var i = 0; i < names.length; i += 2) {
+            if (names[i + 1]) {
+                pairs.push([activities.shift(), names[i], names[i + 1]]);
+            } else {
+                extra = names[i];
+            }
+        }
+
+        if (extra) {
+            pairs[0].push(extra);
+        }
+
+        var results = document.getElementById("pairs");
+        setTimeout(function () {
+            document.getElementById("coffee").style.display = "block";
+            document.onclick = function () {
+                document.onclick = null;
+                document.getElementById("coffee").className = "image hide";
+                pairs.forEach(function(pair) {
+                    var html = '<p class="pair">';
+
+                    var activity = pair.shift();
+                    if (activity) {
+                        html += '<span class="activity">' + activity + '</span>: ';
+                    }
+
+                    html += pair.join(' ☕ ') + "</p>";
+                    results.innerHTML += html;
+                });
+            };
+        }, 0);
+    }
+</script>
+</body>
+</html>
